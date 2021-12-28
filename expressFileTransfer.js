@@ -1,49 +1,42 @@
-var expressJS = require("express");
-var path = require("path");
-var fs = require("fs");
-var expressApp = expressJS();
+const expressJS = require('express');
+const bodyParser = require('body-parser');
+const expressApp = expressJS();
+//database
+let users = [
+    {"id": "1", "name": "Tushar Raina", "email": "rainatushar22@gmail.com"},
+    {"id": "2", "name": "Sachin Tendulkar", "email": "sachin112@gmail.com"}
+];
+expressApp.use(bodyParser.urlencoded({extended: false})); //middleware for parsing bodies
+//the URL. 
+//between parsing the URL encoded data with the querystring library (false)
+//qs library (true)
+expressApp.use(bodyParser.json()); //parsing json objects. 
 
-//1st MiddleWare -> Logging
-expressApp.use((req, res, next) => {
-    console.log("Incoming Request");
-    console.log(req.url);
-    next();
+expressApp.get('/users', (request, response) => {
+    response.json(users).status(200);
 });
-
-//2nd Middleware
-//check the request url and see if it is valid file name
-expressApp.use(function(req, res, next){
-
-    //create the path of the file. 
-    console.log("dirname " + __dirname);
-    
-    //path.join(a, b) => ab
-    //__dirname => Users/riyabansal/Desktop/NodeDemo
-    //req.url => /file1.txt
-    //filepath => Users/riyabansal/Desktop/NodeDemo/file1.txt
-    var filePath = path.join(__dirname, req.url);
-
-    //fs.stat() is used to return information mentioned in the given file. 
-    fs.stat(filePath, function(err, fileInfo){
-        if(err){
-            next();
-            return;
+expressApp.delete('/user/:id', (req, res) => {
+    const id = req.params.id; //id to be deleted sent by the user
+    users = users.filter(user => {
+        if(user.id != id) {
+            return true;
         }
-        if(fileInfo.isFile()) {
-            res.sendFile(filePath);
-        }else{
-            next();
-        }
+        return false;
     });
+    res.send('User is deleted').status(200);
+});
+expressApp.post('/user', (req, res) => {
+    const user = req.body;
+    users.push(user);
+    res.send('User is added to the database').status(200);
 });
 
-//3rd MiddleWare -> Logging
-expressApp.use((req, res, next) => {
-    console.log("Incorrect URL");
-    console.log(req.url);
-    next();
-});
+expressApp.listen(3000, 
+    () => console.log('Listening on port 3000'));
 
-expressApp.listen(4000, function(){
-    console.log("App Started at port 4000");
-});
+ //Get 
+ //Post
+ //Get
+ //Delete
+ //Post
+ //Get   
